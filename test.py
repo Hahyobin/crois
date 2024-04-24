@@ -140,9 +140,11 @@ def plot_data(df, title):
         ax.set_title(f'{title} - Line Plot')
         ax.legend()
     st.pyplot(fig)
-    
+
 def main():
-    st.image('C:/Users/slsld/Desktop/Streamlit/streamlitimage.png', use_column_width=True)
+    image_path = 'streamlitimage.png'
+
+    st.image(image_path, use_column_width=True)
     st.markdown("""
         <style>
             .title {
