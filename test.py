@@ -152,7 +152,9 @@ def plot_data(df, title):
     st.pyplot(fig)
     
 def main():
-    st.image('C:/Users/slsld/Desktop/Streamlit/streamlitimage.png', use_column_width=True)
+    # 예제 GitHub Raw 이미지 URL
+    image_url = "https://github.com/Hahyobin/crois/main/streamlitimage.png"
+    st.image(image_url, use_column_width=True)    
     st.markdown("""
         <style>
             .title {
