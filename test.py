@@ -165,12 +165,12 @@ def main():
                 font-style: italic;
             }
         </style>
-        <div class="title">Crois Anomaly Detection</div>
+        <div class="title">종합설계프로젝트 3팀</div>
     """, unsafe_allow_html=True)
 
     # 사이드바 설정
     st.sidebar.title("File and Settings")
-    folder_path = st.sidebar.text_input('Folder Path', value='C:/Users/slsld/streamlit')
+    folder_path = st.sidebar.text_input('Folder Path', value='C:/Users/')
     update_interval = st.sidebar.number_input('Update Interval (minutes)', min_value=1, value=1)
 
     file_list = list_csv_files(folder_path)
