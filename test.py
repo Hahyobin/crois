@@ -165,7 +165,7 @@ def main():
                 font-style: italic;
             }
         </style>
-        <div class="title">종합설계프로젝트 3팀</div>
+        <div class="title">Crois Anomaly Detection</div>
     """, unsafe_allow_html=True)
 
     # 사이드바 설정
