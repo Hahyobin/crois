@@ -286,7 +286,7 @@ def main():
                 df = preprocess_data(load_data(file_path))
                 st.dataframe(df, use_container_width=True)           
                 original_df = df.copy()
-                #results = []
+                results = []
                 
                 if use_z_score:
                     df = apply_z_score(df)
@@ -295,13 +295,11 @@ def main():
                     
                 if use_pca:
                     df_pca = apply_pca(original_df)
-                    st.dataframe(df, use_container_width=True)           
                     plot_data(df_pca, 'PCA')
                     results.append(('PCA', df_pca))
                     
                 if use_autoencoder:
                     df_auto = apply_autoencoder(original_df)
-                    st.dataframe(df, use_container_width=True)           
                     plot_data(df_auto, 'Autoencoder')
                     results.append(('Autoencoder', df_auto))
 
