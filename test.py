@@ -286,7 +286,7 @@ def main():
                 df = preprocess_data(load_data(file_path))
                 st.dataframe(df, use_container_width=True)           
                 original_df = df.copy()
-                results = []
+                #results = []
                 
                 if use_z_score:
                     df = apply_z_score(df)
