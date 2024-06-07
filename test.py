@@ -1,23 +1,3 @@
-
-def main():
-    # 예제 GitHub Raw 이미지 URL
-    image_url = "streamlitimage.png"
-    st.image(image_url, use_column_width=True)    
-    st.markdown("""
-        <style>
-            .title {
-                font-size: 50px;
-                font-weight: bold;
-                color: white;
-                text-align: center;
-                font-style: italic;
-            }
-        </style>
-        <div class="title">Crois Anomaly Detection</div>
-    """, unsafe_allow_html=True)
-
-
-
 import streamlit as st
 import pandas as pd
 import numpy as np
