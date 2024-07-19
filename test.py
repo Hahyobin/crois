@@ -347,40 +347,40 @@ def main():
             visualization_type = st.selectbox("Choose Visualization", ['Line Plot', 'Control Chart', 'Pareto Chart', 'Spectrogram', 'Scatter', 'Histogram', 'FFT'])
             result = []
 
-            if visualization_type != 'Scatter':
-                column = st.selectbox('Select Column', df.columns)
-                if st.button('Generate Visualization'):
-                    if visualization_type == 'Line Plot':
-                        fig = create_plots2(df, column)
-                        result.append('Line Plot completed')
-                    elif visualization_type == 'Control Chart':
-                        fig = create_control_chart(df, column)
-                        result.append('Control chart completed')
-                    elif visualization_type == 'Pareto Chart':
-                        fig = create_pareto_chart(df, column)
-                        result.append('Pareto chart completed')
-                    elif visualization_type == 'Spectrogram':
-                        fig = spectrogram(df, column)
-                        result.append('Spectrogram completed')
-                    elif visualization_type == 'Histogram':
-                        fig = create_histogram(df, column)
-                        result.append('Histogram completed')
-                    elif visualization_type == 'FFT':
-                        fig = create_fft(df, column)
-                        result.append('FFT completed')
-                    st.pyplot(fig)
-                    display_statistics(df, column)
-                    if result:
-                        st.success(' and '.join(result))
-                    
-            else:
-                selected_columns = st.multiselect('Select two columns for Scatter Plot', df.columns)
-                if len(selected_columns) == 2 and st.button('Generate Scatter Plot'):
-                    fig = create_scatter_plot(df, selected_columns)
-                    result.append('Scatter completed')
-                    st.pyplot(fig)
-                    if result:
-                        st.success(' and '.join(result))
+    if visualization_type != 'Scatter':
+        column = st.selectbox('Select Column', df.columns)
+        button_label = f'Generate {visualization_type}'
+        if st.button(button_label):
+            if visualization_type == 'Line Plot':
+                fig = create_plots2(df, column)
+                result.append('Line Plot completed')
+            elif visualization_type == 'Control Chart':
+                fig = create_control_chart(df, column)
+                result.append('Control chart completed')
+            elif visualization_type == 'Pareto Chart':
+                fig = create_pareto_chart(df, column)
+                result.append('Pareto chart completed')
+            elif visualization_type == 'Spectrogram':
+                fig = spectrogram(df, column)
+                result.append('Spectrogram completed')
+            elif visualization_type == 'Histogram':
+                fig = create_histogram(df, column)
+                result.append('Histogram completed')
+            elif visualization_type == 'FFT':
+                fig = create_fft(df, column)
+                result.append('FFT completed')
+            st.pyplot(fig)
+            display_statistics(df, column)
+            if result:
+                st.success(' and '.join(result))
+    else:
+        selected_columns = st.multiselect('Select two columns for Scatter Plot', df.columns)
+        if len(selected_columns) == 2 and st.button('Generate Scatter Plot'):
+            fig = create_scatter_plot(df, selected_columns)
+            result.append('Scatter completed')
+            st.pyplot(fig)
+            if result:
+                st.success(' and '.join(result))
 
     st.header('3. Data Analysis')
     st.caption('Sidebar에서 분석 방법을 선택해주세요')
