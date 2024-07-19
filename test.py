@@ -243,7 +243,7 @@ def main():
     choice = st.sidebar.selectbox('Select Activity', menu)
 
     folder_path = st.sidebar.text_input('Enter folder path', '')
-
+    
     if choice == 'Data Merging':
         st.subheader('Merge CSV Files')
 
