@@ -231,7 +231,6 @@ def main():
             .title {
                 font-size: 50px;
                 font-weight: bold;
-                color: white;
                 text-align: center;
                 font-style: italic;
             }
