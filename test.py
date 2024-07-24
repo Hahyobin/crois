@@ -3,6 +3,7 @@ import pandas as pd
 import numpy as np
 import os
 import matplotlib.pyplot as plt
+import tempfile
 from glob import glob
 from sklearn.decomposition import PCA
 from sklearn.preprocessing import StandardScaler
@@ -28,14 +29,16 @@ def merge_csv_files(file_list):
     merged_df = pd.concat(data_frames, ignore_index=True)
     return merged_df
 
-def save_merged_csv(file_list, output_filename):
+def save_merged_csv(folder_path, output_filename):
+    file_list = list_csv_files(folder_path)
     if file_list:
         merged_df = merge_csv_files(file_list)
-        merged_df.to_csv(output_filename, index=False)
-        return f"Saved merged file as {output_filename}"
+        output_path = os.path.join(folder_path, output_filename)
+        merged_df.to_csv(output_path, index=False)
+        return f"Saved merged file as {output_path}"
     else:
-        return "No CSV files selected to merge."
-
+        return "No CSV files found to merge."
+    
 # Data preprocessing
 def preprocess_data(df, method):
     if method == 'dropna':
@@ -86,6 +89,7 @@ def check_file_integrity_extended(df, method):
     except Exception as e:
         st.error(f"File error: {str(e)}")
         return None
+
 
 # Data visualization functions
 def create_plots2(df, column):
@@ -225,7 +229,7 @@ def main():
     st.markdown("""
         <style>
             .title {
-                font-size: 50px;
+                font-size: 60px;
                 font-weight: bold;
                 text-align: center;
                 font-style: italic;
@@ -233,134 +237,188 @@ def main():
         </style>
         <div class="title">Crois Data Mining</div>
     """, unsafe_allow_html=True)
-    
-    st.markdown("""<style>.subtitle{text-align:center;font-size:17px;font-style: italic;}</style><div class="subtitle">Data Processing and Analysis Application</div>""", unsafe_allow_html=True)
 
+    st.markdown("""<style>.subtitle{text-align:center;font-size:17px;font-style: italic;}</style><div class="subtitle">Data Processing and Analysis Application</div>""", unsafe_allow_html=True)
+ 
     image_url2 = "222.png"
     st.sidebar.image(image_url2, use_column_width=False)    
     st.sidebar.title("File and Settings")
 
-    folder_path = st.sidebar.text_input("Enter the folder path", "")
+    folder_path = st.sidebar.text_input('Folder Path', value='C:/Users')
+
+    file_list = list_csv_files(folder_path)
+    if st.sidebar.button('Update File List'):
+        file_list = list_csv_files(folder_path)
+        file_names = [os.path.basename(file) for file in file_list]
+        st.sidebar.write(file_names)    
+
+    st.sidebar.markdown('<hr style="border:1px solid gray;">', unsafe_allow_html=True)
+    if st.sidebar.button('Merge and Save'):
+        result_message = save_merged_csv(folder_path, 'merged_data.csv')
+        st.sidebar.success(result_message)
+
+    selected_files = st.sidebar.multiselect('Choose files from folder', file_list)
+    st.sidebar.markdown('<hr style="border:1px solid gray;">', unsafe_allow_html=True)
+
+    uploaded_file = st.sidebar.file_uploader("Upload your file")
+
+    if selected_files:
+        uploaded_file = None
+    if uploaded_file:
+        selected_files = []
+
+    all_selected_files = selected_files + ([uploaded_file.name] if uploaded_file else [])
+
+    st.markdown('<hr style="border:1px solid gray;">', unsafe_allow_html=True)
+
+    if all_selected_files:
+        total_removed_nones = 0
+        method = st.selectbox('Select Preprocessing Method', ['dropna', 'interpolate'])
+        for file_path in all_selected_files:
+            df = load_data(file_path)
+            if df is not None:
+                df_preprocessed = preprocess_data(df.copy(), method)
+                total_removed_nones += df.isnull().sum().sum()
+
+                col1, col2 = st.columns(2)
+                col1.metric(label="Data", value="Raw")
+                col2.metric(label="Data", value="Preprocessed")
+
+                with col1:
+                    st.dataframe(df.head(), use_container_width=True)
+                    st.text(f'Rows: {df.shape[0]}, Columns: {df.shape[1]}')
+                    st.download_button(
+                        label='Download csv',
+                        data=df.to_csv(), 
+                        file_name='Raw data.csv', 
+                        mime='text/csv')
+
+                with col2:
+                    st.dataframe(df_preprocessed.head(), use_container_width=True)
+                    st.text(f'Rows: {df_preprocessed.shape[0]}, Columns: {df_preprocessed.shape[1]}')
+                    st.download_button(
+                        label='Download csv',
+                        data=df_preprocessed.to_csv(), 
+                        file_name='Preprocessed data.csv', 
+                        mime='text/csv')      
+        st.write(f'Data preprocessing has been completed')
     
-    if st.sidebar.button("Update File List"):
-        if folder_path:
-            st.session_state.file_list = list_csv_files(folder_path)
-        else:
-            st.sidebar.error("Please enter a valid folder path")
-    
-    if 'file_list' in st.session_state:
-        file_list = st.session_state.file_list
-    else:
-        file_list = []
+    st.header('1. Data Integrity test')
+    st.caption('데이터 전처리 여부 및 정합성 테스트')
 
-    selected_files = st.sidebar.multiselect("Select CSV files to merge", file_list)
-    
-    if st.sidebar.button("Merge and Save CSV"):
-        if selected_files:
-            output_filename = st.sidebar.text_input("Enter output filename", "merged_output.csv")
-            save_result = save_merged_csv(selected_files, output_filename)
-            st.sidebar.success(save_result)
-        else:
-            st.sidebar.error("No CSV files selected")
-    
-    if 'merged_df' not in st.session_state:
-        st.session_state.merged_df = None
-    
-    st.sidebar.subheader("Preprocessing")
-    preprocessing_method = st.sidebar.selectbox("Select preprocessing method", ['dropna', 'interpolate'])
+    if all_selected_files and st.button('Check'):
+        all_good = True
+        for file_path in all_selected_files:
+            df = preprocess_data(load_data(file_path), method)
+            if df is not None:
+                integrity_results = check_file_integrity_extended(df, method)
+                if integrity_results:
+                    st.subheader("Integrity Check Results")
+                    st.write("No missing values:", integrity_results["no_missing"])
+                    st.write("No duplicate rows:", integrity_results["no_duplicates"])
+                    st.write("Valid data types:", integrity_results["valid_types"])
 
-    st.sidebar.subheader("File Integrity Check")
-    if st.sidebar.button("Check File Integrity"):
-        if st.session_state.merged_df is not None:
-            integrity_results = check_file_integrity_extended(st.session_state.merged_df, preprocessing_method)
-            if integrity_results:
-                st.write("File Integrity Check Results:")
-                st.json(integrity_results)
-        else:
-            st.sidebar.error("No merged data to check integrity")
-    
-    st.sidebar.subheader("Data Visualization")
-    plot_column = st.sidebar.selectbox("Select column to plot", [""] + (st.session_state.merged_df.columns.tolist() if st.session_state.merged_df is not None else []))
+                    if not integrity_results["no_missing"]:
+                        st.warning(f"Missing data detected in {file_path}")
+                        all_good = False
+                    if not integrity_results["no_duplicates"]:
+                        st.warning(f"Duplicate data detected in {file_path}")
+                        all_good = False
+                    if not integrity_results["valid_types"]:
+                        st.warning(f"Invalid data types detected in {file_path}: {integrity_results['type_issues']}")
+                        all_good = False
+                    if integrity_results["range_issues"]:
+                        for col, issue in integrity_results["range_issues"].items():
+                            if issue:
+                                st.warning(f"Data out of range detected in column {col} in {file_path}")
+                                all_good = False
+        if all_good:
+            st.success('All files successfully passed integrity testing')
 
-    if st.sidebar.button("Create Plot"):
-        if st.session_state.merged_df is not None and plot_column:
-            plot_fig = create_plots2(st.session_state.merged_df, plot_column)
-            st.pyplot(plot_fig)
-        else:
-            st.sidebar.error("No column selected or no data available for plotting")
+    st.header('2. Data Visualization')
+    st.caption('데이터 시각화')
+    if all_selected_files:
+        df = load_data(all_selected_files[0])
+        if df is not None:
+            df_preprocessed = preprocess_data(df, method)
 
-    st.sidebar.subheader("Statistics")
-    if st.sidebar.button("Display Statistics"):
-        if st.session_state.merged_df is not None and plot_column:
-            display_statistics(st.session_state.merged_df, plot_column)
-        else:
-            st.sidebar.error("No column selected or no data available for statistics")
-    
-    st.sidebar.subheader("Control Chart")
-    if st.sidebar.button("Create Control Chart"):
-        if st.session_state.merged_df is not None and plot_column:
-            control_chart_fig = create_control_chart(st.session_state.merged_df, plot_column)
-            st.pyplot(control_chart_fig)
-        else:
-            st.sidebar.error("No column selected or no data available for control chart")
+            df_list = [preprocess_data(load_data(file), method) for file in all_selected_files if load_data(file) is not None]
 
-    st.sidebar.subheader("Pareto Chart")
-    if st.sidebar.button("Create Pareto Chart"):
-        if st.session_state.merged_df is not None and plot_column:
-            pareto_chart_fig = create_pareto_chart(st.session_state.merged_df, plot_column)
-            st.pyplot(pareto_chart_fig)
-        else:
-            st.sidebar.error("No column selected or no data available for pareto chart")
+            visualization_type = st.selectbox("Choose Visualization", ['Line Plot', 'Control Chart', 'Pareto Chart', 'Spectrogram', 'Scatter', 'Histogram', 'FFT'])
+            result = []
 
-    st.sidebar.subheader("Scatter Plot")
-    scatter_columns = st.sidebar.multiselect("Select two columns for scatter plot", st.session_state.merged_df.columns.tolist() if st.session_state.merged_df is not None else [])
-    if st.sidebar.button("Create Scatter Plot"):
-        if st.session_state.merged_df is not None and len(scatter_columns) == 2:
-            scatter_plot_fig = create_scatter_plot(st.session_state.merged_df, scatter_columns)
-            st.pyplot(scatter_plot_fig)
-        else:
-            st.sidebar.error("Select exactly two columns for scatter plot")
+            if visualization_type != 'Scatter':
+                column = st.selectbox('Select Column', df.columns)
+                if st.button('Generate Visualization'):
+                    if visualization_type == 'Line Plot':
+                        fig = create_plots2(df, column)
+                        result.append('Line Plot completed')
+                    elif visualization_type == 'Control Chart':
+                        fig = create_control_chart(df, column)
+                        result.append('Control chart completed')
+                    elif visualization_type == 'Pareto Chart':
+                        fig = create_pareto_chart(df, column)
+                        result.append('Pareto chart completed')
+                    elif visualization_type == 'Spectrogram':
+                        fig = spectrogram(df, column)
+                        result.append('Spectrogram completed')
+                    elif visualization_type == 'Histogram':
+                        fig = create_histogram(df, column)
+                        result.append('Histogram completed')
+                    elif visualization_type == 'FFT':
+                        fig = create_fft(df, column)
+                        result.append('FFT completed')
+                    st.pyplot(fig)
+                    display_statistics(df, column)
+                    if result:
+                        st.success(' and '.join(result))
+                    
+            else:
+                selected_columns = st.multiselect('Select two columns for Scatter Plot', df.columns)
+                if len(selected_columns) == 2 and st.button('Generate Scatter Plot'):
+                    fig = create_scatter_plot(df, selected_columns)
+                    result.append('Scatter completed')
+                    st.pyplot(fig)
+                    if result:
+                        st.success(' and '.join(result))
 
-    st.sidebar.subheader("Spectrogram")
-    if st.sidebar.button("Create Spectrogram"):
-        if st.session_state.merged_df is not None and plot_column:
-            spectrogram_fig = spectrogram(st.session_state.merged_df, plot_column)
-            st.pyplot(spectrogram_fig)
-        else:
-            st.sidebar.error("No column selected or no data available for spectrogram")
+    st.header('3. Data Analysis')
+    st.caption('Sidebar에서 분석 방법을 선택해주세요')
+    st.sidebar.markdown('<hr style="border:1px solid gray;">', unsafe_allow_html=True)
+    st.sidebar.write('Select Method')
+    use_z_score = st.sidebar.checkbox('Z-Score Normalization')
+    use_pca = st.sidebar.checkbox('PCA')
+    use_autoencoder = st.sidebar.checkbox('Autoencoder')
 
-    st.sidebar.subheader("Histogram")
-    if st.sidebar.button("Create Histogram"):
-        if st.session_state.merged_df is not None and plot_column:
-            histogram_fig = create_histogram(st.session_state.merged_df, plot_column)
-            st.pyplot(histogram_fig)
+    if st.button('Analyzing Start'):
+        if not all_selected_files:
+            st.error('파일을 선택해야 합니다.')
         else:
-            st.sidebar.error("No column selected or no data available for histogram")
+            for file_path in all_selected_files:
+                df = load_data(file_path)
+                if df is not None:
+                    df_preprocessed = preprocess_data(df.copy(), method)
+                    results = []
 
-    st.sidebar.subheader("FFT")
-    if st.sidebar.button("Create FFT"):
-        if st.session_state.merged_df is not None and plot_column:
-            fft_fig = create_fft(st.session_state.merged_df, plot_column)
-            st.pyplot(fft_fig)
-        else:
-            st.sidebar.error("No column selected or no data available for FFT")
+                    if use_z_score:
+                        df_z_score = apply_z_score(df_preprocessed)
+                        plot_data(df_z_score, 'Z-Score Normalization')
+                        results.append('Z-Score Normalization completed')
 
-    st.sidebar.subheader("Data Transformation")
-    transformation_method = st.sidebar.selectbox("Select transformation method", ['Z-Score', 'PCA', 'Autoencoder'])
+                    if use_pca:
+                        df_pca = apply_pca(df_preprocessed)
+                        plot_data(df_pca, 'PCA Analysis')
+                        results.append('PCA Analysis completed')
 
-    if st.sidebar.button("Apply Transformation"):
-        if st.session_state.merged_df is not None:
-            if transformation_method == 'Z-Score':
-                transformed_data = apply_z_score(st.session_state.merged_df)
-                plot_data(transformed_data, 'Z-Score')
-            elif transformation_method == 'PCA':
-                transformed_data = apply_pca(st.session_state.merged_df)
-                plot_data(transformed_data, 'PCA')
-            elif transformation_method == 'Autoencoder':
-                transformed_data = apply_autoencoder(st.session_state.merged_df)
-                plot_data(transformed_data, 'Autoencoder')
-        else:
-            st.sidebar.error("No data available for transformation")
+                    if use_autoencoder:
+                        df_autoencoder = apply_autoencoder(df_preprocessed)
+                        plot_data(df_autoencoder, 'Autoencoder Analysis')
+                        results.append('Autoencoder Analysis completed')
+
+                    if results:
+                        st.success(' and '.join(results))
+                    else:
+                        st.warning('No analysis method selected')
 
 if __name__ == "__main__":
     main()
