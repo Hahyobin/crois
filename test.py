@@ -244,7 +244,7 @@ def main():
     st.sidebar.image(image_url2, use_column_width=False)    
     st.sidebar.title("File and Settings")
 
-    folder_path = st.sidebar.text_input('Folder Path', value='C:/Users')
+    folder_path = st.sidebar.text_input('Folder Path', value='')
 
     file_list = list_csv_files(folder_path)
     if st.sidebar.button('Update File List'):
