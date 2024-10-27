@@ -240,8 +240,8 @@ def main():
 
     st.markdown("""<style>.subtitle{text-align:center;font-size:17px;font-style: italic;}</style><div class="subtitle">Data Processing and Analysis Application</div>""", unsafe_allow_html=True)
  
-    image_url2 = "121.jpg"
-    st.sidebar.image(image_url2, use_column_width=False)    
+    #image_url2 = "121.jpg"
+    #st.sidebar.image(image_url2, use_column_width=False)    
     st.sidebar.title("File and Settings")
 
     folder_path = st.sidebar.text_input('Folder Path', value='')
