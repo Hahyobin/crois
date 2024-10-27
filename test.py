@@ -224,7 +224,7 @@ def plot_data(df, title):
     st.pyplot(fig)
 
 def main():
-    image_url = "121.png"
+    image_url = "121.jpg"
     st.image(image_url, use_column_width=True)    
     st.markdown("""
         <style>
@@ -240,7 +240,7 @@ def main():
 
     st.markdown("""<style>.subtitle{text-align:center;font-size:17px;font-style: italic;}</style><div class="subtitle">Data Processing and Analysis Application</div>""", unsafe_allow_html=True)
  
-    image_url2 = "121.png"
+    image_url2 = "121.jpg"
     st.sidebar.image(image_url2, use_column_width=False)    
     st.sidebar.title("File and Settings")
 
