@@ -235,7 +235,7 @@ def main():
                 font-style: italic;
             }
         </style>
-        <div class="title">Data Mining(For Hyundai)</div>
+        <div class="title">HHB Data Mining</div>
     """, unsafe_allow_html=True)
 
     st.markdown("""<style>.subtitle{text-align:center;font-size:17px;font-style: italic;}</style><div class="subtitle">Data Processing and Analysis Application</div>""", unsafe_allow_html=True)
