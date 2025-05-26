@@ -224,7 +224,7 @@ def plot_data(df, title):
     st.pyplot(fig)
 
 def main():
-    image_url = "111.jpg"
+    image_url = "111.png"
     st.image(image_url, use_column_width=True)    
     st.markdown("""
         <style>
