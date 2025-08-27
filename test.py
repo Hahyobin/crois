@@ -416,11 +416,12 @@ def main():
                         results.append('Autoencoder Analysis completed')
 
                     if results:
-                        st.success(' 'and'./ '.join(results))
+                        st.success(' / '.join(results))
                     else:
                         st.warning('No analysis method selected')
 
 if __name__ == "__main__":
     main()
+
 
 
