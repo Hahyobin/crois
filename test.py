@@ -235,7 +235,7 @@ def main():
                 font-style: italic;
             }
         </style>
-        <div class="title">HHB Data Mining</div>
+        <div class="title">태현 ㅎㅇㅎㅇ</div>
     """, unsafe_allow_html=True)
 
     st.markdown("""<style>.subtitle{text-align:center;font-size:17px;font-style: italic;}</style><div class="subtitle">Data Processing and Analysis Application</div>""", unsafe_allow_html=True)
@@ -422,6 +422,7 @@ def main():
 
 if __name__ == "__main__":
     main()
+
 
 
 
